@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Generated search index and model cache
+data/index/
+data/index.previous/
+data/index.rebuilding/
+data/hf-cache/
+data/tmp/
+
+# Logs / local files
+*.log
+.vscode/
+.idea/

@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1649a0">
+<title>Search by Image — StitchPartner</title>
+
+<style>
+/* ================================================================
+   STITCHPARTNER — SEARCH BY IMAGE
+   UI redesign only. Backend/API values and search logic are preserved.
+   ================================================================ */
+
+:root{
+  --blue:#1749a3;
+  --blue-dark:#103b88;
+  --blue-soft:#eaf1ff;
+  --green:#21d36b;
+  --green-dark:#12b958;
+  --ink:#111827;
+  --text:#1d2735;
+  --muted:#687386;
+  --line:#e4e8ef;
+  --paper:#fff;
+  --surface:#f6f8fb;
+  --soft:#f0f3f7;
+  --radius:16px;
+  --radius-sm:11px;
+  --shadow:0 8px 28px rgba(21,42,78,.08);
+  --shadow-hover:0 16px 38px rgba(21,42,78,.13);
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans);
+  background:var(--surface);
+  color:var(--text);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+button,input{font:inherit}
+button{cursor:pointer;border:0;background:none;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid rgba(23,73,163,.35);outline-offset:3px}
+
+/* ---------------- top announcement ---------------- */
+
+.announcement{
+  min-height:42px;
+  background:var(--green);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 18px;
+}
+.announcement-inner{
+  width:min(1240px,100%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  font-size:14px;
+  font-weight:650;
+}
+.announcement-text{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.follow-btn{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:34px;
+  padding:5px 18px;
+  border-radius:999px;
+  background:#fff;
+  color:#128c5a;
+  text-decoration:none;
+  font-weight:750;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.follow-btn svg{width:19px;height:19px}
+
+/* ---------------- minimal site header ---------------- */
+
+.site-header{background:#fff;border-bottom:1px solid var(--line)}
+.site-header-inner{
+  width:min(1240px,100%);margin:auto;min-height:84px;padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.logo-link{display:inline-flex;align-items:center;text-decoration:none}
+.logo{width:auto;height:58px;max-width:270px;object-fit:contain}
+.header-contact{display:flex;align-items:center;gap:10px}
+.contact-phone{
+  display:inline-flex;align-items:center;gap:8px;padding:9px 13px;
+  border:1px solid var(--line);border-radius:10px;color:#263348;
+  text-decoration:none;font-size:14px;font-weight:700;background:#fff;
+}
+.contact-phone:hover{border-color:#b9c5d8;background:#f8fafc}
+.contact-phone svg{width:18px;height:18px;color:var(--blue)}
+.contact-whatsapp{
+  width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;background:#20c968;color:#fff;text-decoration:none;
+  box-shadow:0 5px 13px rgba(32,201,104,.2);
+}
+.contact-whatsapp:hover{background:#16b85b}
+.contact-whatsapp svg{width:21px;height:21px}
+
+/* ---------------- page ---------------- */
+
+.page{
+  width:min(1080px,100%);
+  margin:auto;
+  padding:30px 24px 70px;
+}
+.crumbs{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 17px;
+  color:var(--muted);
+  font-size:13px;
+}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{color:var(--blue)}
+.crumb-sep{opacity:.45}
+
+.hero-copy{
+  text-align:center;
+  max-width:760px;
+  margin:0 auto 27px;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:4px 11px;
+  border-radius:999px;
+  background:var(--blue-soft);
+  color:var(--blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.hero-copy h1{
+  margin:12px 0 8px;
+  color:#123a7f;
+  font-size:clamp(29px,4vw,43px);
+  line-height:1.1;
+  letter-spacing:-.035em;
+  font-weight:800;
+}
+.hero-copy p{
+  margin:0 auto;
+  max-width:650px;
+  color:#657084;
+  font-size:16px;
+}
+
+/* ---------------- capture card ---------------- */
+
+.capture{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.capture-head{
+  padding:20px 24px 16px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.capture-title{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+.capture-badge{
+  width:43px;
+  height:43px;
+  flex:0 0 auto;
+  border-radius:12px;
+  background:var(--blue-soft);
+  color:var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.capture-badge svg{width:23px;height:23px}
+.capture-head h2{
+  margin:0;
+  font-size:18px;
+  line-height:1.25;
+  font-weight:750;
+  color:#172337;
+}
+.capture-head p{
+  margin:3px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.dropzone{
+  margin:20px;
+  min-height:235px;
+  padding:35px 24px;
+  text-align:center;
+  border:2px dashed #cfd7e3;
+  border-radius:16px;
+  background:#fbfcfe;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:border-color .18s,background .18s,transform .18s;
+}
+.dropzone:hover{
+  border-color:#9eb4df;
+  background:#f9fbff;
+}
+.dropzone.over{
+  border-color:var(--blue);
+  background:#f1f6ff;
+  transform:scale(.997);
+}
+.dropzone svg{
+  width:51px;
+  height:51px;
+  margin:0 auto 14px;
+  color:var(--blue);
+}
+.dropzone h3{
+  margin:0 0 5px;
+  color:#18263c;
+  font-size:19px;
+  font-weight:750;
+  letter-spacing:-.015em;
+}
+.dropzone p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+.dropzone .drop-hint{
+  margin-top:8px;
+  color:#8791a1;
+  font-size:12px;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:0 20px 20px;
+}
+
+.btn{
+  min-height:52px;
+  padding:0 19px;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  font-size:15px;
+  font-weight:750;
+  letter-spacing:-.005em;
+  transition:background .18s,box-shadow .18s,transform .08s,border-color .18s;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 5px 13px rgba(23,73,163,.18);
+}
+.btn-primary:hover{
+  background:var(--blue-dark);
+  box-shadow:0 8px 18px rgba(23,73,163,.23);
+}
+.btn-primary[disabled]{
+  background:#c9ced6;
+  color:#fff;
+  cursor:not-allowed;
+  box-shadow:none;
+  transform:none;
+}
+.btn-ghost{
+  background:#fff;
+  color:#233149;
+  border:1px solid #d8dee8;
+}
+.btn-ghost:hover{
+  background:#f6f8fb;
+  border-color:#bdc8d9;
+}
+.btn-block{width:100%}
+
+/* ---------------- preview ---------------- */
+
+.preview{display:none;padding:20px}
+.preview.on{display:block}
+.preview-frame{
+  position:relative;
+  background:#f0f3f7;
+  border:1px solid var(--line);
+  border-radius:13px;
+  overflow:hidden;
+  aspect-ratio:4/3;
+  max-height:520px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.preview-frame img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.filemeta{
+  margin:10px 2px 0;
+  font-size:13px;
+  color:var(--muted);
+}
+.preview .actions{padding:13px 0 0}
+
+/* ---------------- progress ---------------- */
+
+.progress{
+  display:none;
+  padding:42px 24px 48px;
+  text-align:center;
+}
+.progress.on{display:block}
+.spinner{
+  width:43px;
+  height:43px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  border:3px solid #dfe5ed;
+  border-top-color:var(--blue);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress h3{
+  margin:0 0 5px;
+  color:#172337;
+  font-size:18px;
+  font-weight:750;
+}
+.progress p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+.progress .slow{
+  margin-top:12px;
+  font-size:13px;
+  color:#46556c;
+  display:none;
+}
+.progress .slow.on{display:block}
+
+/* ---------------- results ---------------- */
+
+.results{
+  margin-top:31px;
+}
+.results-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:5px;
+}
+.results-head h2{
+  margin:0;
+  color:#123a7f;
+  font-size:25px;
+  font-weight:800;
+  letter-spacing:-.025em;
+}
+.results-head span{
+  color:var(--muted);
+  font-size:13px;
+  white-space:nowrap;
+}
+.results-message{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.grid{
+  display:grid;
+  gap:16px;
+  margin-top:17px;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  box-shadow:0 4px 15px rgba(21,42,78,.045);
+  transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--shadow-hover);
+  border-color:#d1d9e5;
+}
+.card-img{
+  aspect-ratio:1;
+  background:#f5f7fa;
+  overflow:hidden;
+}
+.card-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .3s ease;
+}
+.card:hover .card-img img{transform:scale(1.025)}
+.card-body{
+  padding:13px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  flex:1;
+}
+.card h3{
+  margin:0;
+  color:#172337;
+  font-size:15px;
+  line-height:1.4;
+  font-weight:700;
+}
+.card .sku{
+  margin:0;
+  font-size:12px;
+  color:var(--muted);
+}
+.card .price{
+  font-size:15px;
+  font-weight:750;
+  color:#172337;
+}
+.card .price del{
+  color:var(--muted);
+  font-weight:400;
+}
+.tag{
+  align-self:flex-start;
+  font-size:11px;
+  font-weight:750;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#eef2f7;
+  color:#536176;
+}
+.tag.strong{
+  background:#e7f8ef;
+  color:#13824b;
+}
+.card-links{
+  display:flex;
+  gap:8px;
+  margin-top:auto;
+  padding-top:5px;
+}
+.card-links a{
+  flex:1;
+  min-height:42px;
+  padding:9px 7px;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:750;
+}
+.link-view{
+  background:var(--blue);
+  color:#fff;
+}
+.link-view:hover{background:var(--blue-dark)}
+.link-ask{
+  background:#edf9f3;
+  color:#12814b;
+  border:1px solid #c9ead8;
+}
+.link-ask:hover{background:#e2f5eb}
+
+/* ---------------- skeletons ---------------- */
+
+.skeleton .card-img,
+.skeleton .bar{
+  background:linear-gradient(90deg,#e8edf3 25%,#f5f7fa 37%,#e8edf3 63%);
+  background-size:400% 100%;
+  animation:shimmer 1.4s ease infinite;
+}
+.skeleton .bar{height:12px;border-radius:5px}
+.skeleton .bar.short{width:55%}
+@keyframes shimmer{
+  0%{background-position:100% 0}
+  100%{background-position:0 0}
+}
+
+/* ---------------- notices ---------------- */
+
+.notice{
+  margin-top:25px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:23px;
+  box-shadow:var(--shadow);
+}
+.notice h3{
+  margin:0 0 7px;
+  color:#172337;
+  font-size:19px;
+  font-weight:750;
+}
+.notice p{
+  margin:0 0 10px;
+  color:var(--muted);
+}
+.notice ul{
+  margin:0 0 18px;
+  padding-left:21px;
+  color:#526077;
+}
+.notice li{margin-bottom:5px}
+.notice .btn{
+  text-decoration:none;
+  width:auto;
+  display:inline-flex;
+}
+
+/* ---------------- information strip ---------------- */
+
+.info-strip{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.info-item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:14px 15px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.info-icon{
+  width:35px;
+  height:35px;
+  border-radius:9px;
+  background:var(--blue-soft);
+  color:var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.info-icon svg{width:18px;height:18px}
+.info-item strong{
+  display:block;
+  color:#253149;
+  font-size:13px;
+}
+.info-item span{
+  display:block;
+  color:#7a8494;
+  font-size:11px;
+  margin-top:1px;
+}
+
+/* ---------------- direct WhatsApp ---------------- */
+
+.whatsapp-float{
+  position:fixed;right:20px;bottom:20px;z-index:70;width:54px;height:54px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:#20c968;color:#fff;box-shadow:0 9px 24px rgba(24,42,68,.20);
+  text-decoration:none;transition:transform .18s,box-shadow .18s,background .18s;
+}
+.whatsapp-float:hover{
+  background:#16b85b;transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(24,42,68,.24);
+}
+.whatsapp-float svg{width:27px;height:27px}
+
+/* ---------------- footer ---------------- */
+
+footer{
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding:25px 20px 32px;
+  text-align:center;
+  color:#7a8494;
+  font-size:12px;
+}
+
+/* ---------------- mobile source picker ---------------- */
+
+.sheet-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(12,24,45,.54);
+  display:none;
+  z-index:100;
+  backdrop-filter:blur(2px);
+}
+.sheet-backdrop.on{display:block}
+.sheet{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:110;
+  background:#fff;
+  border-radius:21px 21px 0 0;
+  padding:8px 17px calc(env(safe-area-inset-bottom) + 20px);
+  transform:translateY(100%);
+  transition:transform .22s ease;
+  box-shadow:0 -10px 40px rgba(0,0,0,.13);
+}
+.sheet.on{transform:translateY(0)}
+.sheet-handle{
+  width:42px;
+  height:4px;
+  border-radius:3px;
+  background:#d5dbe4;
+  margin:8px auto 15px;
+}
+.sheet h3{
+  margin:0 0 14px;
+  text-align:center;
+  color:#172337;
+  font-size:18px;
+  font-weight:750;
+}
+.sheet .btn{margin-bottom:10px}
+.hidden-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ---------------- responsive ---------------- */
+
+@media(min-width:700px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(min-width:1020px){
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+  .site-header-inner{min-height:72px;padding:9px 16px}
+  .logo{height:51px;max-width:220px}
+  .header-contact{gap:7px}
+  .contact-phone{
+    padding:8px;width:40px;height:40px;justify-content:center;border-radius:50%;
+  }
+  .contact-phone span{display:none}
+  .contact-phone svg{width:19px;height:19px}
+  .contact-whatsapp{width:40px;height:40px}
+
+  .announcement-inner{
+    justify-content:center;
+  }
+  .announcement-text{display:none}
+  .follow-btn{min-width:155px}
+
+  .site-header-inner{
+    min-height:75px;
+    padding:9px 18px;
+  }
+  .logo{
+    height:55px;
+    max-width:230px;
+  }
+  .header-menu{display:none}
+  .menu-btn{display:flex}
+
+  .catalogue-bar{
+    padding:9px 12px;
+  }
+  .catalogue-inner{
+    grid-template-columns:40px minmax(0,1fr) 42px;
+    gap:8px;
+  }
+  .catalogue-menu{
+    width:40px;
+    height:48px;
+  }
+  .catalogue-menu span,
+  .catalogue-menu span:before,
+  .catalogue-menu span:after{
+    width:27px;
+  }
+  .search-link{
+    min-height:48px;
+    padding:0 12px 0 15px;
+  }
+  .search-link span{font-size:14px}
+  .search-icon{width:25px;height:25px}
+  .account-btn{
+    width:42px;
+    height:48px;
+  }
+  .account-icon{width:29px;height:29px}
+
+  .page{
+    padding:24px 14px 70px;
+  }
+  .crumbs{display:none}
+  .hero-copy{
+    margin-bottom:20px;
+  }
+  .hero-copy h1{
+    font-size:31px;
+  }
+  .hero-copy p{
+    font-size:14px;
+    line-height:1.55;
+    padding:0 7px;
+  }
+
+  .capture{
+    border-radius:17px;
+  }
+  .capture-head{
+    padding:16px;
+  }
+  .capture-title{gap:10px}
+  .capture-badge{
+    width:39px;height:39px;border-radius:10px;
+  }
+  .capture-head h2{font-size:16px}
+  .capture-head p{font-size:12px}
+
+  .dropzone{
+    min-height:215px;
+    margin:14px;
+    padding:28px 17px;
+  }
+  .dropzone svg{
+    width:45px;height:45px;
+  }
+  .dropzone h3{font-size:17px}
+  .dropzone p{font-size:13px}
+  .dropzone .drop-hint{font-size:11px}
+
+  .actions{
+    grid-template-columns:1fr;
+    padding:0 14px 14px;
+  }
+  .btn{min-height:49px;font-size:14px}
+
+  .preview{padding:14px}
+  .preview .actions{
+    padding:12px 0 0;
+  }
+
+  .progress{
+    padding:38px 18px 43px;
+  }
+
+  .results{margin-top:24px}
+  .results-head h2{font-size:22px}
+  .results-head span{font-size:12px}
+  .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-top:13px;
+  }
+  .card{border-radius:13px}
+  .card-body{padding:10px;gap:6px}
+  .card h3{font-size:13px}
+  .card .price{font-size:13px}
+  .card-links{gap:6px}
+  .card-links a{
+    min-height:39px;
+    font-size:11px;
+    padding:8px 5px;
+  }
+  .tag{font-size:9px;padding:3px 6px}
+
+  .info-strip{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .mobile-bottom{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:80;
+    height:69px;
+    padding:5px 8px calc(env(safe-area-inset-bottom) + 5px);
+    background:rgba(255,255,255,.97);
+    border-top:1px solid #e1e5eb;
+    box-shadow:0 -5px 20px rgba(15,30,55,.07);
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .mobile-bottom a{
+    min-width:0;
+    text-decoration:none;
+    color:#202a39;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font-size:10px;
+    font-weight:650;
+  }
+  .mobile-bottom svg{
+    width:24px;height:24px;
+    stroke-width:1.8;
+  }
+  .mobile-bottom a.active{color:var(--blue)}
+}
+
+@media(max-width:390px){
+  .logo{height:50px;max-width:205px}
+  .hero-copy h1{font-size:28px}
+  .grid{gap:8px}
+  .card-body{padding:9px}
+  .card-links a{font-size:10px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .spinner{animation-duration:2.4s}
+  .skeleton .card-img,.skeleton .bar{animation:none}
+  .btn:active{transform:none}
+  .sheet{transition:none}
+  .card,.card-img img{transition:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- Announcement bar: visual/header only -->
+<div class="announcement">
+  <div class="announcement-inner">
+    <div class="announcement-text">Premium sewing &amp; tailoring parts — delivered to your workshop.</div>
+    <a class="follow-btn" href="#" aria-label="Follow StitchPartner on WhatsApp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 11.5a8.4 8.4 0 0 1-12.7 7.2L4 20l1.3-3.1A8.4 8.4 0 1 1 20 11.5Z"/>
+        <path d="M8.8 8.1c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.3.1.5-.1.7l-.5.6c.6 1 1.4 1.8 2.5 2.3l.7-.6c.2-.2.4-.2.7-.1l1.4.6c.3.1.4.3.3.6-.2.8-.7 1.3-1.4 1.5-2.2.2-5.7-2.7-6.6-4.7-.4-.9-.4-1.6-.1-2.3Z"/>
+      </svg>
+      Follow Now
+    </a>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="logo-link" href="https://stitchpartner.com/" aria-label="StitchPartner home">
+      <img src="https://stitchpartner.com/wp-content/uploads/2025/01/stitchpartnerfinal-pg3-1000-x-285-px.svg"
+           class="logo" alt="Stitch Partner">
+    </a>
+
+    <div class="header-contact" aria-label="Contact StitchPartner">
+      <a class="contact-phone" href="tel:+917447449590" aria-label="Call StitchPartner on 744 744 9590">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z"/>
+        </svg>
+        <span>744 744 9590</span>
+      </a>
+
+      <a class="contact-whatsapp" href="https://wa.me/917447449590" target="_blank" rel="noopener"
+         aria-label="Chat with StitchPartner on WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 11.5a8.4 8.4 0 0 1-12.7 7.2L4 20l1.3-3.1A8.4 8.4 0 1 1 20 11.5Z"/>
+          <path d="M8.8 8.1c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.3.1.5-.1.7l-.5.6c.6 1 1.4 1.8 2.5 2.3l.7-.6c.2-.2.4-.2.7-.1l1.4.6c.3.1.4.3.3.6-.2.8-.7 1.3-1.4 1.5-2.2.2-5.7-2.7-6.6-4.7-.4-.9-.4-1.6-.1-2.3Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+<section class="hero-copy">
+    <span class="eyebrow">Smart product finder</span>
+    <h1>Find the right part from a photo.</h1>
+    <p>Upload a clear photo of your sewing machine part and we'll find matching products from the StitchPartner catalogue.</p>
+  </section>
+
+  <section class="capture" aria-label="Search by image">
+
+    <div class="capture-head">
+      <div class="capture-title">
+        <div class="capture-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 4h-5L8 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4l-1.5-2Z"/>
+            <circle cx="12" cy="13" r="3.5"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Upload a part photo</h2>
+          <p>JPG, PNG or WebP · up to 10 MB</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14.5 4h-5L8 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4l-1.5-2Z"/>
+        <circle cx="12" cy="13" r="3.5"/>
+      </svg>
+      <h3>Add a photo of the part</h3>
+      <p>Take a photo or choose one from your device</p>
+      <div class="drop-hint">On desktop, you can also drag &amp; drop an image here.</div>
+    </div>
+
+    <div class="actions" id="actions">
+      <button class="btn btn-primary" id="openSheet" type="button">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Add photo
+      </button>
+      <button class="btn btn-ghost" id="openGallery" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <circle cx="8.5" cy="9" r="1.5"/>
+          <path d="m4 17 5-5 3.5 3 2.5-2.5 5 4.5"/>
+        </svg>
+        Choose from gallery
+      </button>
+    </div>
+
+    <div class="preview" id="preview">
+      <div class="preview-frame">
+        <img id="previewImage" alt="The photo you selected">
+      </div>
+      <p class="filemeta" id="fileMeta"></p>
+      <div class="actions">
+        <button class="btn btn-ghost" id="retake" type="button">Choose another</button>
+        <button class="btn btn-primary" id="searchBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+            <path d="m16 16 5 5"></path>
+          </svg>
+          Search catalogue
+        </button>
+      </div>
+    </div>
+
+    <div class="progress" id="progress" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <h3 id="progressTitle">Uploading image…</h3>
+      <p id="progressSub">This usually takes a few seconds</p>
+      <p class="slow" id="slowNote">Still working — a slow connection can add a moment.</p>
+    </div>
+
+  </section>
+<div id="output"></div>
+
+  <input class="hidden-input" type="file" id="cameraInput" accept="image/jpeg,image/png,image/webp" capture="environment">
+  <input class="hidden-input" type="file" id="galleryInput" accept="image/jpeg,image/png,image/webp">
+
+</main>
+<div class="sheet-backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-handle"></div>
+  <h3 id="sheetTitle">Add a photo</h3>
+  <button class="btn btn-primary btn-block" id="takePhoto" type="button">Take photo</button>
+  <button class="btn btn-ghost btn-block" id="fromGallery" type="button">Choose from gallery</button>
+  <button class="btn btn-ghost btn-block" id="closeSheet" type="button">Cancel</button>
+</div>
+
+<a class="whatsapp-float"
+   href="https://wa.me/917447449590"
+   target="_blank" rel="noopener"
+   aria-label="Chat with StitchPartner on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 11.5a8.4 8.4 0 0 1-12.7 7.2L4 20l1.3-3.1A8.4 8.4 0 1 1 20 11.5Z"/>
+    <path d="M8.8 8.1c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.3.1.5-.1.7l-.5.6c.6 1 1.4 1.8 2.5 2.3l.7-.6c.2-.2.4-.2.7-.1l1.4.6c.3.1.4.3.3.6-.2.8-.7 1.3-1.4 1.5-2.2.2-5.7-2.7-6.6-4.7-.4-.9-.4-1.6-.1-2.3Z"/>
+  </svg>
+</a>
+
+<footer>Photos are used only to run your search and are never stored.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // Tune these together with the server: uploading more pixels than the model
+  // will ever look at only costs the customer time on a slow connection.
+  var MAX_DIM = 1024;
+  var JPEG_QUALITY = 0.82;
+  var MAX_BYTES = 10 * 1024 * 1024;
+  var TIMEOUT_MS = 45000;
+  var WHATSAPP_NUMBER = ""; // e.g. "919876543210" — leave empty to hide Enquire
+
+  var $ = function (id) { return document.getElementById(id); };
+  var dropzone = $("dropzone"), actions = $("actions"), preview = $("preview");
+  var previewImage = $("previewImage"), fileMeta = $("fileMeta");
+  var progress = $("progress"), output = $("output");
+  var sheet = $("sheet"), backdrop = $("backdrop");
+  var cameraInput = $("cameraInput"), galleryInput = $("galleryInput");
+
+  var selectedBlob = null, previewUrl = null, lastFileName = "";
+  var stageTimers = [], slowTimer = null;
+
+  /* ---------------- bottom sheet ---------------- */
+  function openSheet() { sheet.classList.add("on"); backdrop.classList.add("on"); }
+  function closeSheet() { sheet.classList.remove("on"); backdrop.classList.remove("on"); }
+
+  $("openSheet").addEventListener("click", function () {
+    // On desktop there is no camera worth offering; go straight to the picker.
+    if (matchMedia("(pointer: coarse)").matches) { openSheet(); }
+    else { galleryInput.click(); }
+  });
+  $("openGallery").addEventListener("click", function () { galleryInput.click(); });
+  $("closeSheet").addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", closeSheet);
+  $("takePhoto").addEventListener("click", function () { closeSheet(); cameraInput.click(); });
+  $("fromGallery").addEventListener("click", function () { closeSheet(); galleryInput.click(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+
+  /* ---------------- file selection ---------------- */
+  [cameraInput, galleryInput].forEach(function (input) {
+    input.addEventListener("change", function () {
+      var file = input.files && input.files[0];
+      input.value = "";
+      if (file) { handleFile(file); }
+    });
+  });
+
+  ["dragenter", "dragover"].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault(); dropzone.classList.add("over");
+    });
+  });
+
+  ["dragleave", "drop"].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault(); dropzone.classList.remove("over");
+    });
+  });
+
+  dropzone.addEventListener("drop", function (e) {
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) { handleFile(file); }
+  });
+
+  dropzone.addEventListener("click", function () { $("openSheet").click(); });
+
+  function handleFile(file) {
+    clearOutput();
+
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      showError("That file isn't an image we can read",
+                "Please upload a JPG, PNG or WebP image.");
+      return;
+    }
+
+    if (file.size > MAX_BYTES) {
+      showError("That image is too large", "Please choose an image smaller than 10 MB.");
+      return;
+    }
+
+    lastFileName = file.name || "photo";
+    compress(file).then(function (blob) {
+      selectedBlob = blob;
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); }
+      previewUrl = URL.createObjectURL(blob);
+      previewImage.src = previewUrl;
+      fileMeta.textContent = "Ready to search · " + Math.round(blob.size / 1024) + " KB";
+      dropzone.style.display = "none";
+      actions.style.display = "none";
+      preview.classList.add("on");
+    }).catch(function () {
+      showError("We couldn't read that image", "Please try a different photo.");
+    });
+  }
+
+  /* ---------------- client-side compression ---------------- */
+  function compress(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+
+      img.onload = function () {
+        try {
+          var scale = Math.min(1, MAX_DIM / Math.max(img.width, img.height));
+          var w = Math.max(1, Math.round(img.width * scale));
+          var h = Math.max(1, Math.round(img.height * scale));
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob(function (blob) {
+            resolve(blob && blob.size < file.size ? blob : file);
+          }, "image/jpeg", JPEG_QUALITY);
+
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          resolve(file);
+        }
+      };
+
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("decode"));
+      };
+
+      img.src = url;
+    });
+  }
+
+  /* ---------------- reset ---------------- */
+  $("retake").addEventListener("click", function () {
+    selectedBlob = null;
+    preview.classList.remove("on");
+    dropzone.style.display = "";
+    actions.style.display = "";
+    clearOutput();
+  });
+
+  /* ---------------- search ---------------- */
+  $("searchBtn").addEventListener("click", runSearch);
+
+  function runSearch() {
+    if (!selectedBlob) { return; }
+    clearOutput();
+    preview.classList.remove("on");
+    progress.classList.add("on");
+    startStages();
+
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
+
+    var form = new FormData();
+    form.append("file", selectedBlob, lastFileName.replace(/\.[^.]+$/, "") + ".jpg");
+
+    fetch("/search", { method: "POST", body: form, signal: controller.signal })
+      .then(function (response) {
+        clearTimeout(timer);
+        return response.json().then(function (data) {
+          return { ok: response.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        stopStages();
+
+        if (!result.data || result.data.success === false) {
+          showError("Search didn't complete",
+                    (result.data && result.data.message) ||
+                    "We're having trouble analysing the image. Please try again.", true);
+          return;
+        }
+
+        render(result.data);
+      })
+      .catch(function (err) {
+        clearTimeout(timer);
+        stopStages();
+
+        if (err && err.name === "AbortError") {
+          showError("That took longer than expected",
+                    "The search timed out. Please check your connection and try again.", true);
+        } else {
+          showError("Connection interrupted",
+                    "We couldn't reach the search service. Please try again.", true);
+        }
+      });
+  }
+
+  /* ---------------- staged loading ---------------- */
+  function startStages() {
+    setStage("Uploading image…", "This usually takes a few seconds");
+
+    stageTimers.push(setTimeout(function () {
+      setStage("Analysing image…", "Reading the shape and details of the part");
+    }, 1200));
+
+    stageTimers.push(setTimeout(function () {
+      setStage("Finding similar products…", "Comparing against the StitchPartner catalogue");
+    }, 3000));
+
+    slowTimer = setTimeout(function () {
+      $("slowNote").classList.add("on");
+    }, 8000);
+
+    showSkeletons();
+  }
+
+  function stopStages() {
+    stageTimers.forEach(clearTimeout);
+    stageTimers = [];
+    clearTimeout(slowTimer);
+    $("slowNote").classList.remove("on");
+    progress.classList.remove("on");
+    preview.classList.add("on");
+  }
+
+  function setStage(title, sub) {
+    $("progressTitle").textContent = title;
+    $("progressSub").textContent = sub;
+  }
+
+  function showSkeletons() {
+    var cards = "";
+
+    for (var i = 0; i < 4; i++) {
+      cards += '<div class="card skeleton"><div class="card-img"></div>' +
+               '<div class="card-body"><div class="bar"></div>' +
+               '<div class="bar short"></div></div></div>';
+    }
+
+    output.innerHTML = '<section class="results"><div class="grid">' + cards + '</div></section>';
+  }
+
+  /* ---------------- rendering ---------------- */
+  function clearOutput() { output.innerHTML = ""; }
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c];
+    });
+  }
+
+  function render(data) {
+    if (!data.matched || !data.results || !data.results.length) {
+      var tips = (data.suggestions || []).map(function (t) {
+        return "<li>" + escapeHtml(t) + "</li>";
+      }).join("");
+
+      output.innerHTML =
+        '<div class="notice"><h3>We couldn\'t find a close match</h3>' +
+        "<p>Try again with:</p><ul>" + tips + "</ul>" +
+        '<a class="btn btn-ghost" style="text-decoration:none" href="/?s=">Search products manually</a>' +
+        "</div>";
+
+      return;
+    }
+
+    var cards = data.results.map(function (item) {
+      var name = escapeHtml(item.name);
+      var strong = item.match === "strong";
+      var label = strong ? "Strong match" :
+                  (item.match === "close" ? "Close match" : "Possible match");
+
+      var meta = item.sku
+        ? '<p class="sku">SKU ' + escapeHtml(item.sku) + "</p>"
+        : "";
+
+      var price = item.price_html
+        ? '<div class="price">' + item.price_html + "</div>"
+        : "";
+
+      var enquire = "";
+
+      if (WHATSAPP_NUMBER) {
+        var msg = "Hello StitchPartner, I'm enquiring about: " + item.name +
+                  (item.sku ? " (SKU " + item.sku + ")" : "") + "\n" + item.url;
+
+        enquire = '<a class="link-ask" target="_blank" rel="noopener" href="https://wa.me/' +
+                  WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg) + '">Enquire</a>';
+      }
+
+      return '<article class="card">' +
+        '<div class="card-img">' +
+          (item.image
+            ? '<img loading="lazy" decoding="async" src="' + escapeHtml(item.image) +
+              '" alt="' + name + '">'
+            : "") +
+        "</div>" +
+        '<div class="card-body">' +
+          '<span class="tag' + (strong ? " strong" : "") + '">' + label + "</span>" +
+          "<h3>" + name + "</h3>" + meta + price +
+          '<div class="card-links">' +
+            '<a class="link-view" href="' + escapeHtml(item.url) + '">View product</a>' +
+            enquire +
+          "</div>" +
+        "</div></article>";
+    }).join("");
+
+    output.innerHTML =
+      '<section class="results"><div class="results-head">' +
+      "<h2>Similar products</h2><span>" + data.results.length + " found</span></div>" +
+      '<p class="results-message">' +
+      escapeHtml(data.message || "") + "</p>" +
+      '<div class="grid">' + cards + "</div></section>";
+  }
+
+  function showError(title, message, retryable) {
+    stopStages();
+
+    output.innerHTML =
+      '<div class="notice"><h3>' + escapeHtml(title) + "</h3>" +
+      "<p>" + escapeHtml(message) + "</p>" +
+      (retryable
+        ? '<button class="btn btn-primary" id="retry" type="button">Try again</button>'
+        : "") +
+      "</div>";
+
+    if (retryable) {
+      $("retry").addEventListener("click", runSearch);
+    }
+  }
+})();
+</script>
+</body>
+</html>
