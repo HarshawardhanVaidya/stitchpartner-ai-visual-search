@@ -1,0 +1,63 @@
+
+name: Check SearchByLens Sync
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check Railway sync status
+        env:
+          ADMIN_KEY: ${{ secrets.RAILWAY_ADMIN_API_KEY }}
+        run: |
+          if [ -z "$ADMIN_KEY" ]; then
+            echo "Missing GitHub secret RAILWAY_ADMIN_API_KEY"
+            exit 1
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --max-time 30 \
+            -H "Authorization: Bearer $ADMIN_KEY" \
+            "https://search.stitchpartner.com/sync/status" \
+            -o /tmp/sync-response.json
+
+          python3 - <<'PY'
+          import json
+          import re
+
+          with open("/tmp/sync-response.json") as f:
+              data = json.load(f)
+
+          def sanitize(value):
+              value = str(value)
+              value = re.sub(r'https?://\S+', '[URL]', value)
+              value = re.sub(
+                  r'(?i)(key|token|secret|password)=[^&\s]+',
+                  r'\1=[REDACTED]',
+                  value
+              )
+              return value[:400]
+
+          print("Sync status:",
+                sanitize(data.get("status", "unknown")))
+
+          report = data.get("last_report") or {}
+          for field in ("found", "new", "updated",
+                        "embeddings", "skipped", "errors"):
+              value = report.get(field)
+              if field == "errors" and isinstance(value, list):
+                  print("First 10 errors:")
+                  for error in value[:10]:
+                      print("-", sanitize(error))
+              elif value is not None:
+                  print(field, ":", sanitize(value))
+
+          if not report:
+              print("Response keys:", list(data.keys()))
+          PY
